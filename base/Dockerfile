@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION=22.04
+ARG UBUNTU_VERSION=24.04
 ARG PYTHON_VERSION=3.13
 
 FROM ubuntu:${UBUNTU_VERSION} AS base
@@ -13,14 +13,18 @@ WORKDIR /tmp
 ENV TZ=PST
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8 \
+    TERM=xterm-256color
 
 # Layer 0: OS - System Foundation
 RUN apt-get update --yes --quiet --fix-missing \
     && apt-get install --yes --quiet \
         acl \
+        bash-completion \
         bzip2 \
+        ca-certificates \
         curl \
+        emacs-nox \
         git \
         locales \
         nano \
@@ -28,7 +32,7 @@ RUN apt-get update --yes --quiet --fix-missing \
         openssh-client \
         sudo \
         tzdata \
-        vim \
+        vim-nox \
         wget \
         zsh \
         tcsh \
@@ -52,6 +56,9 @@ RUN set -x \
         --yes \
         python=${PYTHON_VERSION} mamba \
     && rm -rf ./bin/micromamba
+
+# Symlink conda profile script for automatic shell activation
+RUN ln -s ${CONDA_DIR}/etc/profile.d/conda.sh /etc/profile.d/conda.sh
 
 # Install CADC Science Stack & baseline tools
 RUN mamba install --yes \
